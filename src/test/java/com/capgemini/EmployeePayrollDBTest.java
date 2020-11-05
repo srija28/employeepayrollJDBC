@@ -24,4 +24,12 @@ public class EmployeePayrollDBTest {
  		boolean result = empPayRollService.checkEmployeePayrollInSyncWithDB("Shreya Reddy");
  		Assert.assertTrue(result);
  	}
+	
+	@Test
+ 	public void givenDBFindSumOfSalaryOfMale_shouldReturnSum() throws EmpPayrollException {
+ 		EmpPayrollService empPayRollService = new EmpPayrollService();
+ 		double sum = empPayRollService.getSumByGender(IOService.DB_IO,"M");
+ 		double sum1 = empPayRollService.getEmpDataGroupedByGender(IOService.DB_IO, "salary", "SUM","M");
+ 		Assert.assertTrue(sum == sum1);
+ 	}
 }

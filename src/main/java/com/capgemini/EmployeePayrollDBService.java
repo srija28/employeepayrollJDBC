@@ -10,6 +10,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.HashMap;
 
 public class EmployeePayrollDBService {
 	
@@ -92,11 +94,44 @@ public class EmployeePayrollDBService {
 				int id = result.getInt("id");
 				String name = result.getString("name");
 				double salary = result.getDouble("salary");
-				employeePayrollList.add(new EmployeePayrollData(id,name,salary));
+				LocalDate startDate = result.getDate("start").toLocalDate();
+				String gender = result.getString("gender");
+				employeePayrollList.add(new EmployeePayrollData(id,name,salary, startDate,gender));
+				
 		}
 		}catch(SQLException e) {
 			throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
 		}
 		return employeePayrollList;
 	}
-}
+	public double getSumByGender(String c) throws EmpPayrollException {
+ 		List<EmployeePayrollData> employeePayrollList = this.readData();
+ 		double sum = 0.0;
+ 		List<EmployeePayrollData> sortByGenderList = employeePayrollList.stream()
+ 				                            .filter(employee -> employee.getGender().equals(c))
+ 				                            .collect(Collectors.toList());
+ 		sum = sortByGenderList.stream()
+ 				                           .map(employee -> employee.getSalary()).reduce(0.0, Double::sum);
+ 		return sum;
+ 	}
+
+
+ 	public double getEmpDataGroupedByGender(String column, String operation, String gender) throws EmpPayrollException {
+
+ 		Map<String, Double> sumByGenderMap = new HashMap<>();
+ 		String sql = String.format("SELECT gender, %s(%s) FROM employee_data GROUP BY gender;", operation, column);
+ 		try (Connection connection = getConnection()) {
+ 			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+ 			ResultSet resultSet = preparedStatement.executeQuery();
+ 			while (resultSet.next()) {
+ 				sumByGenderMap.put(resultSet.getString(1), resultSet.getDouble(2));
+ 			}
+ 		} catch (SQLException e) {
+ 			throw new EmpPayrollException(EmpPayrollException.ExceptionType.INCORRECT_INFO, e.getMessage());
+ 		}
+ 		if(gender.equals("M")) {
+ 		return sumByGenderMap.get("M");
+ 		}
+ 		return sumByGenderMap.get("F");
+ 	}
+ }
