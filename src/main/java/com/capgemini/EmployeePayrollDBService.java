@@ -30,7 +30,6 @@ public class EmployeePayrollDBService {
 				int id = result.getInt("id");
 				String name = result.getString("name");
 				double salary = result.getDouble("salary");
-				//LocalDate startDate = result.getDate("start").toLocalDate();
 				employeePayrollList.add(new EmployeePayrollData(id,name,salary));
 			}
 		}catch(SQLException e) {
@@ -41,12 +40,10 @@ public class EmployeePayrollDBService {
 	
 
  	public int updateEmployeeData(String name, double salary) throws EmpPayrollException {
- 		// TODO Auto-generated method stub
  		return this.updateEmployeeDataUsingStatement(name, salary);
  	}
 
  	private int updateEmployeeDataUsingStatement(String name, double salary) throws EmpPayrollException {
- 		// TODO Auto-generated method stub
  		String sql = String.format("update employee_data set salary = %.2f where name ='%s';", salary, name);
  		try(Connection connection = this.getConnection()){
  			Statement statement = connection.createStatement();
@@ -57,8 +54,6 @@ public class EmployeePayrollDBService {
  	}
 
  	public EmployeePayrollData getEmployeePayrollData(String name) throws EmpPayrollException {
- 		// TODO Auto-generated method stub
-
  			List<EmployeePayrollData> employeePayrollList = this.readData();
  			EmployeePayrollData employeeData = employeePayrollList.stream()
  					.filter(employee -> employee.getName().contentEquals(name))
