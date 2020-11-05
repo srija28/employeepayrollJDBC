@@ -2,6 +2,7 @@ package com.capgemini;
 
 import java.time.LocalDate;
 
+
 public class EmployeePayrollData {
 	private int id;
 	private String name;
@@ -18,7 +19,7 @@ public class EmployeePayrollData {
 		this(id,name,salary);
 		this.setStartDate(startDate);
 	}
-	public double getSalary() {
+	public Double getSalary() {
 		return salary;
 	}
 
