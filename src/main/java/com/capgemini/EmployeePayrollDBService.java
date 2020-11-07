@@ -1,6 +1,7 @@
 package com.capgemini;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,7 +64,7 @@ public class EmployeePayrollDBService {
 		}
 	}
 
-	public List<EmployeePayrollData> getEmployeePayrollData(String name) throws EmpPayrollException{
+	public List<EmployeePayrollData> getEmployeePayrollDataFromDB(String name) throws EmpPayrollException{
 		List<EmployeePayrollData> employeePayrollList = null;
 		if(this.employeePayrollDataStatement == null)
 			this.prepareStatementForEmployeeData();
@@ -104,6 +105,16 @@ public class EmployeePayrollDBService {
 		}
 		return employeePayrollList;
 	}
+	
+	public EmployeePayrollData getEmployeePayrollData(String name) throws EmpPayrollException {
+			List<EmployeePayrollData> employeePayrollList = this.readData();
+			EmployeePayrollData employeeData = employeePayrollList.stream()
+					.filter(employee -> employee.getName().contentEquals(name))
+					.findFirst()
+					.orElse(null);
+			return employeeData;
+	}
+	
 	public double getSumByGender(String c) throws EmpPayrollException {
  		List<EmployeePayrollData> employeePayrollList = this.readData();
  		double sum = 0.0;
@@ -133,5 +144,43 @@ public class EmployeePayrollDBService {
  		return sumByGenderMap.get("M");
  		}
  		return sumByGenderMap.get("F");
+ 	}
+ 	public Map<String, Double> getAvgSalaryByGender() throws EmpPayrollException  {
+ 		// TODO Auto-generated method stub
+ 		String sql ="SELECT gender, AVG(salary) as avg_salary FROM employee_data GROUP BY gender;";
+ 		Map<String, Double> genderToAvgSalaryMap = new HashMap<>();
+ 		try (Connection connection = this.getConnection()){
+ 			Statement statement = connection.createStatement();
+ 			ResultSet result = statement.executeQuery(sql);
+ 			while(result.next()) {
+ 				String gender = result.getString("gender");
+ 				double salary = result.getDouble("avg_salary");
+ 				genderToAvgSalaryMap.put(gender, salary);
+ 			}
+
+ 		}catch(SQLException e) {
+ 			throw new EmpPayrollException(EmpPayrollException.ExceptionType.INCORRECT_INFO, e.getMessage());
+ 		}
+ 		return genderToAvgSalaryMap;
+ 	}
+
+ 	public EmployeePayrollData addEmpToPayroll(String name, double salary, LocalDate start, String gender) throws  EmpPayrollException {
+ 
+ 		int id = -1;
+ 		EmployeePayrollData employeePayrollData = null;
+ 		String sql = String.format("INSERT INTO employee_data(name, salary, start, gender) VALUES('%s', '%s', '%s', '%s');"
+ 				,name, salary, Date.valueOf(start), gender);
+ 		try(Connection connection = this.getConnection()){
+ 			Statement statement = connection.createStatement();
+ 			int rowAffected = statement.executeUpdate(sql, statement.RETURN_GENERATED_KEYS);
+ 			if(rowAffected == 1) {
+ 				ResultSet resultSet = statement.getGeneratedKeys();
+ 				if(resultSet.next()) id = resultSet.getInt(1);
+ 			}
+ 			employeePayrollData = new EmployeePayrollData(id, name, salary, start, gender);
+ 		}catch(SQLException e) {
+ 			throw new EmpPayrollException(EmpPayrollException.ExceptionType.INCORRECT_INFO, e.getMessage());
+ 		}
+ 		return employeePayrollData;
  	}
  }

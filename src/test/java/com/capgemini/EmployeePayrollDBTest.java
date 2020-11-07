@@ -1,5 +1,6 @@
 package com.capgemini;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.Assert;
@@ -13,7 +14,7 @@ public class EmployeePayrollDBTest {
 	public void givenEmployeePayrollDB_shouldReturnCount() throws EmpPayrollException {
 		EmpPayrollService empPayRollService = new EmpPayrollService();
 		List<EmployeePayrollData> empPayrollList = empPayRollService.readEmpPayrollData(IOService.DB_IO);
-		Assert.assertEquals(3, empPayrollList.size());
+		Assert.assertEquals(8, empPayrollList.size());
 	}
 	
 	@Test
@@ -31,5 +32,14 @@ public class EmployeePayrollDBTest {
  		double sum = empPayRollService.getSumByGender(IOService.DB_IO,"M");
  		double sum1 = empPayRollService.getEmpDataGroupedByGender(IOService.DB_IO, "salary", "SUM","M");
  		Assert.assertTrue(sum == sum1);
+ 	}
+	
+	@Test
+ 	public void givenNewEmployee_WhenAdded_ShouldSyncWithDB() throws EmpPayrollException {
+ 		EmpPayrollService empPayRollService = new EmpPayrollService();
+ 		empPayRollService.readEmpPayrollData(IOService.DB_IO);
+ 		empPayRollService.addEmpToPayroll("srujana", 400000.0, LocalDate.now(), "F");
+ 		boolean result = empPayRollService.checkEmployeePayrollInSyncWithDB("srujana");
+ 		Assert.assertTrue(result);
  	}
 }
