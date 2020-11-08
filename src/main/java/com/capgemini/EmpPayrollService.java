@@ -108,8 +108,26 @@ public class EmpPayrollService {
 		return null;
 	}
 
-	public void addEmpToPayroll(String name, double salary, LocalDate start, String gender) throws EmpPayrollException{
-		employeePayrollList.add(employeePayrollDBService.addEmpToPayroll(name, salary, start, gender));
+	public void addEmpToPayroll(String name, double salary, LocalDate start, String gender, List<String> deptList) throws EmpPayrollException{
+		employeePayrollList.add(employeePayrollDBService.addEmpToPayroll(name, salary, start, gender, deptList));
+	}
+
+	public void remove(String name) throws EmpPayrollException {
+		employeePayrollDBService.remove(name);
+	}
+
+	public void addEmpToPayroll(List<EmployeePayrollData> empPayrollDataList) {
+		empPayrollDataList.forEach(empPayrollData -> {
+			System.out.println("Emp being Added : " + empPayrollData.getName());
+			try {
+				this.addEmpToPayroll(empPayrollData.getName(), empPayrollData.getSalary(), empPayrollData.getStartDate(),
+						empPayrollData.getGender(), empPayrollData.getDeptList());
+			} catch (EmpPayrollException e) {
+				e.printStackTrace();
+			}
+			System.out.println("Emp Added : " + empPayrollData.getName());
+		});
+		System.out.println(this.employeePayrollList);
 	}
 
 
